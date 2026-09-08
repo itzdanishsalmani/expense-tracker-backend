@@ -1,8 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express, { Request, Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import passport from "./auth/passport";
+import authRoute from "./routes/authRoute";
+import userRoute from "./routes/userRoute";
 
-dotenv.config();
 const app = express();
 const APP_VERSION = Number(process.env.APP_VERSION)
 
@@ -11,6 +15,17 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(passport.initialize());
+
+app.use((req, res, next) => {
+    console.log('Incoming request:', req.method, req.url);
+    next();
+});
+
+// Register routes
+app.use("/auth", authRoute);
+app.use("/api/auth", authRoute);
+app.use("/user", userRoute);
 
 app.get("/health", (req: Request, res: Response): any => {
 
@@ -35,26 +50,7 @@ app.get("/api/check-version", (req: Request, res: Response): any => {
     }
 });
 
-app.post("/create-user", (req:Request, res:Response)=> {
-    const {email, password} = req.body
-
-    try {
-        // const checkEmail = await p
-        const checkEmail = false
-
-        if(checkEmail) {
-            return res.json({
-                status:400,
-                messaage:"User already exist"
-            })
-        }
-
-        // db create user with email, password
-
-    } catch (error) {
-        
-    }
-})
+// Removed mock /create-user and /login routes as we are using real Google Auth
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");

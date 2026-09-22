@@ -1,44 +1,103 @@
-import { Request, Response, Router } from 'express';
-import passport from '../auth/passport';  // import passport from our custom passport file
-import * as AuthService from '../services/AuthService';  // assuming you have a service
-import { User } from './../generated/prisma/client';
+import { Request, Response } from "express";
+import { prisma } from "../services/prisma";
+import bcrypt from "bcrypt"
 import dotenv from "dotenv";
 dotenv.config();
 
-const router = Router();
+const SALT_ROUND = Number(process.env.SALT_ROUND);
 
-/*
-  This route triggers the Google sign-in/sign-up flow. 
-  When the frontend calls it, the user will be redirected to the 
-  Google accounts page to log in with their Google account.
-*/
-// Google OAuth2.0 route
-router.get('/test', (req, res) => res.send('authRoute is working'));
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
+export async function signUp(req:Request, res:Response) {
+    try {
+        const userData = req.body
+
+        const hashPassword = await bcrypt.hash(userData.password, SALT_ROUND)
+
+        const newUser = await prisma.user.create({
+            data: {
+                name: userData.name,
+                email: userData.email,
+                password: hashPassword
+            }
+        })
+
+        return res.json({
+            success: true,
+            message: "User created successfully",
+            data: newUser
+        })
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: "User creation failed",
+            error: error
+        })
+    }
+}
+
+export async function signIn(req:Request, res:Response) {
+    try {
+        const userData = req.body
+
+        const existingUser = await prisma.user.findUnique({
+            where: {
+                email: userData.email,
+            }
+        })
+
+        if (!existingUser) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password",
+            })
+        }
+
+        const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password)
+
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password",
+            })
+        }
+
+        return res.json({
+            success: true,
+            message: "Signed in successfully",
+            data: existingUser
+        })
+    } catch (error) {
+        return res.json({
+            success: false,
+            message: "User creation failed",
+            error: error
+        })
+    }
+}
 
 
-/*
-  This route is the callback endpoint for Google OAuth2.0. 
-  After the user logs in via Google's authentication flow, they are redirected here.
-  Passport.js processes the callback, attaches the user to req.user, and we handle 
-  the access token generation and redirect the user to the frontend.
-*/
-// Google OAuth2.0 callback route
-router.get('/google/callback', passport.authenticate('google', { session: false }), (req: Request, res: Response) => {
-  try {
-    // we can use req.user because the GoogleStrategy that we've 
-    // implemented in `google.ts` attaches the user
-    const user = req.user as User;
+export async function createExpense(req:Request, res:Response) {
+    try {
+        const userData = req.body
 
-    // handle the google callback, generate auth token
-    const { authToken } = AuthService.handleGoogleCallback({ id: user.id, jwtSecureCode: user.jwtSecureCode });
-
-    // redirect to frontend with the accessToken as query param
-    const redirectUrl = `${process.env.FE_BASE_URL}?accessToken=${authToken}`;
-    return res.redirect(redirectUrl);
-  } catch (error) {
-    return res.status(500).json({ message: 'An error occurred during authentication', error });
-  }
-});
-
-export default router;
+        const newExpense = await prisma.expense.create({
+            data:{
+                userId: userData.userId,
+                amount: userData.amount,
+                category: userData.category,
+                merchant: userData.merchant,
+                date: userData.date
+            }
+        })
+        return res.json({
+            success: true,
+            message: "Expense added successfully",
+        })
+    } catch (error) {
+        console.log(error)
+        return res.json({
+            success: false,
+            message: "unable to track a expense",
+            
+        })
+    }
+}

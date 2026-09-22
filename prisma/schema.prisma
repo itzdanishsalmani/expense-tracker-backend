@@ -12,15 +12,35 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model User {
-        id String @id @default(uuid())
-    googleId String
-    email String
-    fullName String
-    jwtSecureCode String
-
+    userId String @id @default(uuid())
+    name String
+    email String @unique
+    password String 
+    expense Expense[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-
 }
+
+model Expense {
+    expenseId String   @id @default(uuid())
+    date      DateTime @default(now())
+    amount    Float
+    merchant  String
+    category  Category
+    userId    String
+    user      User     @relation(fields: [userId], references: [userId])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum Category {
+   GROCERY
+   TRANSPORT
+   FOOD
+   ENTERTAINMENT
+   HEALTH
+   BILLS
+   OTHER
+}
+

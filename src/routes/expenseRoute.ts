@@ -3,35 +3,34 @@ import { prisma } from "../services/prisma";
 import dotenv from "dotenv";
 dotenv.config();
 
-export async function createExpense(req:Request, res:Response) {
-    try {
-        const userData = req.body
-        const userId = req.userId;
+// export async function createExpense(req:Request, res:Response) {
+//     try {
+//         const userData = req.body
+//         const userId = req.userId;
 
-        console.log("userId", userId, "req.userId", req.userId, "userData.userId", userData.userId)
 
-        const newExpense = await prisma.expense.create({
-            data:{
-                userId: userId!,
-                amount: userData.amount,
-                category: userData.category,
-                merchant: userData.merchant,
-                date: userData.date
-            }
-        })
-        return res.json({
-            success: true,
-            message: "Expense added successfully",
-        })
-    } catch (error) {
-        console.log(error)
-        return res.json({
-            success: false,
-            message: "unable to track a expense",
+//         const newExpense = await prisma.expense.create({
+//             data:{
+//                 userId: userId!,
+//                 amount: userData.amount,
+//                 category: userData.category,
+//                 merchant: userData.merchant,
+//                 date: userData.date
+//             }
+//         })
+//         return res.json({
+//             success: true,
+//             message: "Expense added successfully",
+//         })
+//     } catch (error) {
+//         console.log(error)
+//         return res.json({
+//             success: false,
+//             message: "unable to track a expense",
             
-        })
-    }
-}
+//         })
+//     }
+// }
 
 export async function bulkCreateExpenses(req: Request, res: Response) {
     const expenses = Array.isArray(req.body) ? req.body : req.body?.expenses;

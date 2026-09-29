@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import "../types/express";
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
@@ -27,6 +26,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
         }
 
         req.userId = decodedToken.userId;
+        console.log("req.userId", req.userId)
 
         next();
 

@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import { prisma } from "../services/prisma";
 import bcrypt from "bcrypt"
 import dotenv from "dotenv";
+import jwt, { JwtPayload } from "jsonwebtoken";
+
 dotenv.config();
 
 const SALT_ROUND = Number(process.env.SALT_ROUND);
 
-export async function signUp(req:Request, res:Response) {
+export async function signUp(req: Request, res: Response) {
     try {
         const userData = req.body
 
@@ -20,10 +22,16 @@ export async function signUp(req:Request, res:Response) {
             }
         })
 
+        const decodedToken = jwt.sign({ userId: newUser.userId }, process.env.JWT_SECRET as string)
+
         return res.json({
             success: true,
             message: "User created successfully",
-            data: newUser
+            token: decodedToken,
+            userData:{
+                name: newUser.name,
+                email: newUser.email,
+            }
         })
     } catch (error) {
         return res.json({
@@ -34,7 +42,7 @@ export async function signUp(req:Request, res:Response) {
     }
 }
 
-export async function signIn(req:Request, res:Response) {
+export async function signIn(req: Request, res: Response) {
     try {
         const userData = req.body
 
@@ -60,44 +68,24 @@ export async function signIn(req:Request, res:Response) {
             })
         }
 
+        const decodedToken = jwt.sign({ userId: existingUser.userId }, process.env.JWT_SECRET as string)
+
+
         return res.json({
             success: true,
             message: "Signed in successfully",
-            data: existingUser
+            token: decodedToken,
+            userData:{
+                name: existingUser.name,
+                email: existingUser.email,
+            }
         })
     } catch (error) {
         return res.json({
             success: false,
-            message: "User creation failed",
+            message: "sign-in failed",
             error: error
         })
     }
 }
 
-
-export async function createExpense(req:Request, res:Response) {
-    try {
-        const userData = req.body
-
-        const newExpense = await prisma.expense.create({
-            data:{
-                userId: userData.userId,
-                amount: userData.amount,
-                category: userData.category,
-                merchant: userData.merchant,
-                date: userData.date
-            }
-        })
-        return res.json({
-            success: true,
-            message: "Expense added successfully",
-        })
-    } catch (error) {
-        console.log(error)
-        return res.json({
-            success: false,
-            message: "unable to track a expense",
-            
-        })
-    }
-}

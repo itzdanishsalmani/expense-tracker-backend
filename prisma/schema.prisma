@@ -23,7 +23,7 @@ model User {
 }
 
 model Expense {
-    expenseId String   @id @default(uuid())
+    expenseId String   @id 
     date      DateTime @default(now())
     amount    Float
     merchant  String

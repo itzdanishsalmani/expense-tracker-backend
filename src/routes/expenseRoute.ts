@@ -157,8 +157,6 @@ export async function updateBulkExpenses(req: Request, res: Response) {
 
 export async function getExpense(req:Request, res:Response) {
     try {
-        const userData = req.body
-
         const newExpense = await prisma.expense.findMany({
             where:{
                 userId: req.userId!,
@@ -177,5 +175,62 @@ export async function getExpense(req:Request, res:Response) {
             message: "unable to get expense data ",
             
         })
+    }
+}
+
+export async function getAllExpenses(req: Request, res: Response) {
+    const page = Number.parseInt(String(req.query.page ?? "1"), 10);
+    const limit = Number.parseInt(String(req.query.limit ?? "100"), 10);
+
+    if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 100) {
+        return res.status(400).json({
+            success: false,
+            message: "Page must be a positive integer and limit must be between 1 and 100",
+        });
+    }
+
+    try {
+        const userId = req.userId!;
+        const where = { userId };
+        const [expenses, total] = await Promise.all([
+            prisma.expense.findMany({
+                where,
+                orderBy: [{ date: "desc" }, { expenseId: "desc" }],
+                skip: (page - 1) * limit,
+                take: limit,
+                select: {
+                    expenseId: true,
+                    amount: true,
+                    date: true,
+                    category: true,
+                    merchant: true,
+                },
+            }),
+            prisma.expense.count({ where }),
+        ]);
+
+        // The mobile sync client uses `id` as the local transaction key.
+        const data = expenses.map(({ expenseId, ...expense }) => ({
+            id: expenseId,
+            ...expense,
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Expenses fetched successfully",
+            data,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error) {
+        console.error("Error in getAllExpenses:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch expenses",
+        });
     }
 }

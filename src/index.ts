@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { signIn, signUp } from "./routes/authRoute";
-import { bulkCreateExpenses, updateBulkExpenses } from "./routes/expenseRoute";
+import { bulkCreateExpenses, getAllExpenses, updateBulkExpenses } from "./routes/expenseRoute";
 import { authMiddleware } from "./services/middleware";
 dotenv.config();
 
@@ -35,11 +35,11 @@ app.post("/api/auth/signup", signUp)
 
 app.post("/api/auth/signin", signIn)
 
-// app.post("/api/expense/create-expense", authMiddleware, createExpense)
-
 app.post('/api/expense/bulk-create-expense', authMiddleware, bulkCreateExpenses);
 
 app.put('/api/expense/bulk-update-expense', authMiddleware, updateBulkExpenses);
+
+app.get('/api/expense/get-all-expenses', authMiddleware, getAllExpenses);
 
 
 app.get("/api/check-version", (req: Request, res: Response): any => {

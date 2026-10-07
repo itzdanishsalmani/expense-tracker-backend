@@ -19,5 +19,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            cd /root/project/expense-tracker-backend
             git pull
             docker compose up -d --build --remove-orphans

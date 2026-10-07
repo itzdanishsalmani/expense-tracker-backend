@@ -21,9 +21,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-COPY --from=build /app/src/generated ./src/generated
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/src/generated ./dist/generated
 
 EXPOSE 3000
 CMD ["npm", "start"]

@@ -13,6 +13,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
             })
         }
 
+        
         const token = header.split(" ")[1];
 
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;

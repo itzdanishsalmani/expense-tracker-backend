@@ -3,7 +3,7 @@
     "buildCommand": "npm run vercel-build",
     "functions": {
         "api/index.ts": {
-            "includeFiles": "src/generated/prisma/**"
+            "includeFiles": "dist/**"
         }
     },
     "rewrites": [

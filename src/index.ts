@@ -42,6 +42,7 @@ app.put('/api/expense/bulk-update-expense', authMiddleware, updateBulkExpenses);
 app.get('/api/expense/get-all-expenses', authMiddleware, getAllExpenses);
 
 
+
 app.get("/api/check-version", (req: Request, res: Response): any => {
     const version = Number(req.query.version);
     try {

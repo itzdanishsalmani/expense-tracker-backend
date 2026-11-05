@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma } from "../services/prisma";
 import bcrypt from "bcrypt"
 import dotenv from "dotenv";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -46,6 +46,12 @@ export async function signIn(req: Request, res: Response) {
     try {
         const userData = req.body
 
+        if (!userData.email || !userData.password) { return res.status(400).json({
+                success: false,
+                message: "Email and password are required",
+            })
+        }
+
         const existingUser = await prisma.user.findUnique({
             where: {
                 email: userData.email,
@@ -60,6 +66,7 @@ export async function signIn(req: Request, res: Response) {
         }
 
         const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password)
+        console.log("isPasswordValid", isPasswordValid)
 
         if (!isPasswordValid) {
             return res.status(401).json({
@@ -67,6 +74,7 @@ export async function signIn(req: Request, res: Response) {
                 message: "Invalid email or password",
             })
         }
+
 
         const decodedToken = jwt.sign({ userId: existingUser.userId }, process.env.JWT_SECRET as string)
 
@@ -78,13 +86,12 @@ export async function signIn(req: Request, res: Response) {
             userData:{
                 name: existingUser.name,
                 email: existingUser.email,
-            }
-        })
+            } })
     } catch (error) {
-        return res.json({
+        console.error("[signIn] failed", error);
+        return res.status(500).json({
             success: false,
-            message: "sign-in failed",
-            error: error
+            message: "Sign-in failed",
         })
     }
 }

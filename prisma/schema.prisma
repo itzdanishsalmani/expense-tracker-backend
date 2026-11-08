@@ -38,11 +38,12 @@ model Expense {
 }
 
 enum Category {
-   GROCERY
-   TRANSPORT
-   FOOD
-   ENTERTAINMENT
-   HEALTH
-   BILLS
-   OTHER
+  TRANSPORT 
+  FOOD 
+  SHOPPING 
+  BILLS 
+  ENTERTAINMENT 
+  HEALTH 
+  TRAVEL 
+  OTHERS
 }

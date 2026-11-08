@@ -10,13 +10,14 @@
 */
 
 export const Category = {
-  GROCERY: 'GROCERY',
   TRANSPORT: 'TRANSPORT',
   FOOD: 'FOOD',
+  SHOPPING: 'SHOPPING',
+  BILLS: 'BILLS',
   ENTERTAINMENT: 'ENTERTAINMENT',
   HEALTH: 'HEALTH',
-  BILLS: 'BILLS',
-  OTHER: 'OTHER'
+  TRAVEL: 'TRAVEL',
+  OTHERS: 'OTHERS'
 } as const
 
 export type Category = (typeof Category)[keyof typeof Category]

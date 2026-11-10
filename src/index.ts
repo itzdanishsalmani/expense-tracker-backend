@@ -4,6 +4,7 @@ import cors from "cors";
 import { signIn, signUp } from "./routes/authRoute";
 import { bulkCreateExpenses, getAllExpenses, updateBulkExpenses } from "./routes/expenseRoute";
 import { authMiddleware } from "./services/middleware";
+import { updateUserProfile } from "./routes/userRoute";
 dotenv.config();
 
 const app = express();
@@ -34,6 +35,8 @@ app.get("/health", (req: Request, res: Response): any => {
 app.post("/api/auth/signup", signUp)
 
 app.post("/api/auth/signin", signIn)
+
+app.patch("/api/user/profile", authMiddleware, updateUserProfile)
 
 app.post('/api/expense/bulk-create-expense', authMiddleware, bulkCreateExpenses);
 
